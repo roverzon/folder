@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        #upload-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <button class="upload-btn" >Submit file</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <input id="upload-input" type="file" name="uploads[]" multiple="multiple">
+
+
+    <script src="/jquery/dist/jquery.min.js" ></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+
+        $('.upload-btn').on('click',function(){
+            $('#upload-input').click();
+        });
+
+        $('#upload-input').on('change',function(){
+
+            var files = $(this).get(0).files;
+
+            var files = $(this).get(0).files;
+
+            if( files.length > 0 ){
+
+                var formData = new FormData();
+
+                for(var i = 0; i < files.length; i++ ){
+                    var file = files[i];
+
+                    formData.append('uploads[]',file, file.name)
+
+                }
+
+            }
+
+            $.ajax({
+                url : '/api/files/upload',
+                type : 'POST',
+                data : formData,
+                processData : false,
+                contentType : false,
+                success: function(data){
+                    console.log("uploaded successfully" + data)
+                },
+                xhr: function(){
+                    var xhr = new XMLHttpRequest();
+                    xhr.upload.addEventListener('progress',function(evt){
+                        if(evt.lengthComputable){
+
+                            var percentComplete = evt.loaded / evt.total;
+                            percentComplete = parseInt(percentComplete * 100)
+
+                            $('.progress-bar').text(percentComplete + '%');
+                            $('.progress-bar').width(percentComplete + '%');
+
+                            if(percentComplete == 100){
+                                $('.progress-bar').html('Done')
+                            }
+
+                        }
+                    }, false);
+
+                    return xhr;
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
